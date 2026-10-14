@@ -34,12 +34,17 @@
 */
 
 #include <WiFi.h>
+#include <HTTPClient.h>
 #include <WebServer.h>
 #include <DNSServer.h>
 
 // ---------------- CONFIGURAÇÃO WI-FI (Access Point) ----------------
 const char* apSSID     = "MonitorRio";      // nome que vai aparecer na lista de redes
 const char* apPassword = "monitor123";      // minimo 8 caracteres, ou "" para rede aberta
+
+const char* ssid            = "";
+const char* password        = "";
+const char* googleScriptURL = "";
 
 // ---------------- PINOS DO SENSOR ----------------
 const int trigPin = 5;
@@ -295,10 +300,19 @@ setInterval(atualizar, 2000);
 
 void setup() {
   Serial.begin(115200);
+  WiFi.begin(ssid, password);
 
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Conectando o WiFi");
+  }
+  Serial.println("Conectado ao WiFi");
+    
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
+  montarCabecalho("ESP32", "A", {"Data completa", "Data", "Hora", "Nível", "Perigo", "Ultrassônico"});
+  
   WiFi.mode(WIFI_AP);
   WiFi.softAP(apSSID);
 
@@ -307,7 +321,7 @@ void setup() {
   Serial.println("================================");
   Serial.println("MONITOR DE NIVEL DE RIO");
   Serial.println("================================");
-  Serial.print("WiFi: ");
+  Serial.print(": ");
   Serial.println(apSSID);
   Serial.print("IP: ");
   Serial.println(ip);
@@ -327,6 +341,10 @@ void setup() {
   server.begin();
 
   Serial.println("Servidor iniciado!");
+}
+
+void loop() {
+  if (WiFi.status() == WL_CONNECTED)
 }
 
 void loop() {
